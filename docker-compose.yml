@@ -1,0 +1,9 @@
+version: '3'
+services:
+        web:
+                image: "centos:centos7"
+                ports:
+                        - "8000:80"
+                volumes:
+                        - .:/app
+                tty: true
