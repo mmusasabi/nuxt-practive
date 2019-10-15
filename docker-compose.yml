@@ -1,9 +1,14 @@
 version: '3'
 services:
-        web:
-                image: "centos:centos7"
-                ports:
-                        - "8000:80"
-                volumes:
-                        - .:/app
-                tty: true
+  nuxt:
+    build:
+      context: ./docker/nuxt
+      dockerfile: Dockerfile
+    ports:
+      - 3030:3000
+    volumes:
+      - .:/app
+    stdin_open: true
+    tty: true
+    environment:
+      - test=1
