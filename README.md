@@ -23,4 +23,3 @@ npm -v 6.4.1
 
 [Nuxt.js はじめました。プロジェクト作成で 5 つの方法を試した。 - Qiita](https://qiita.com/high-u/items/1d2e91e97495ac90d10c)
 
-
