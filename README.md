@@ -12,6 +12,15 @@ Docker version 19.03.2, build 6a30dfc
 node -v v8.16.2
 npm -v 6.4.1
 
+## Run
+
+```
+docker-compose run nuxt bash
+
+yarn install
+yarn run dev
+```
+
 ## windowsでdocker-compose使う際の注意点
 
 - WSLを使うとvolumesを使う際にパス違いで上手くマウントが出来ない。
