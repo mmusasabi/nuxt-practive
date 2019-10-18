@@ -32,11 +32,8 @@ RUN npm install --global yarn@$CMD_YARN_VERSION && \
 # install vue-cli
 RUN npm install -g @vue/cli @vue/cli-init
 
-# copy application code from host.
-ADD ../../app /app
-
 ## install packages.
-RUN yarn install
+# RUN yarn install
 
-EXPOSE 3000
-CMD ["yarn", "run", "dev"]
+# EXPOSE 3000
+# CMD ["yarn", "run", "dev"]
