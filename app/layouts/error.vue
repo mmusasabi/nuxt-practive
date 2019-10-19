@@ -9,6 +9,6 @@
 <script>
 export default {
   props: ['error'],
-  layout: 'blog' // エラーページ用のカスタムレイアウトを指定できます
+  layout: 'simple' // エラーページ用のカスタムレイアウトを指定できます
 }
 </script>
