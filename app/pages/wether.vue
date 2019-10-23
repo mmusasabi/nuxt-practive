@@ -8,7 +8,7 @@
         nuxt practice
       </h2>
 
-      <div v-if="wether_data === null">
+      <div v-if="wether_data == null">
         Loading...
       </div>
       <div v-else>
@@ -41,11 +41,7 @@ export default {
       console.log(res.data.pref)
       this.wether_data = res.data.pref
     }).catch(error => {
-      const {
-        status,
-        statusText
-      } = error.response;
-      console.log(`Error! HTTP Status: ${status} ${statusText}`);
+      console.log(error)
     });
 
   }
