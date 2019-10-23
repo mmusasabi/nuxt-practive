@@ -34,6 +34,16 @@ module.exports = {
         })
       }
     }
+  },
+  /*
+  ** modules
+  */
+  modules: [
+    // '@nuxtjs/auth',
+    '@nuxtjs/axios',
+  ],
+  axios: {
+    baseURL: "https://api.github.com"
   }
 }
 
