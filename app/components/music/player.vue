@@ -16,10 +16,6 @@
       </div>
 
       <div>
-        <button v-on:click="musicChange()">音楽変更</button>
-      </div>
-
-      <div>
         <h2>音量の調整: {{musicVolume}}</h2>
         <button v-on:click="volumeUp()">
           ＋
@@ -46,7 +42,6 @@ export default {
   },
   data() {
     return {
-      audioContext: null,
       source: null,
       gainNode: null,
       musicStatus: MUSIC_STOP,
@@ -55,13 +50,10 @@ export default {
     }
   },
 
-// AudioBufferSourceNodeは基本使い捨で。使い終わったた（音楽を停止）すると再度再生できない（エラーになる
-// 一時停止が存在するので、連続で再生、停止をするなら、一時停止（suspend）＝＞再開（resume）という流れ
-
   created() {    
     if (process.browser) { // Nuxt サーバーサイドで実行しない
-      this.audioContext = new AudioContext()
-      this.source = this.audioContext.createBufferSource(); // AudioBufferSourceNodeを作成
+      const context = new AudioContext();
+      this.source = context.createBufferSource();
 
       // 音楽ファイルを読み込む。
       var request = new XMLHttpRequest();
@@ -72,20 +64,19 @@ export default {
       let tis = this
       request.onload = function () {
         var res = request.response;
-        tis.audioContext.decodeAudioData(res, function (buf) {
+        context.decodeAudioData(res, function (buf) {
           tis.source.buffer = buf;
         });
       };
-      this.source.connect(this.audioContext.destination);
+      this.source.connect(context.destination);
 
       // 音量調整
-      this.gainNode = this.audioContext.createGain();
+      this.gainNode = context.createGain();
       this.source.connect(this.gainNode);
-      this.gainNode.connect(this.audioContext.destination);
+      this.gainNode.connect(context.destination);
       // this.gainNode.gain.value が音量のやつ。　初期値1。-1で音が消える。-2と0で音量一緒。
       this.gainNode.gain.value = this.musicVolume;
     }
-    console.log(this.audioContext);
     console.log(this.source);
   },
 
@@ -96,44 +87,6 @@ export default {
   },
 
   methods: {
-    // AudioBufferSourceNodeのメモリ解放条件　https://weblike-curtaincall.ssl-lolipop.jp/portfolio-web-sounder/webaudioapi-basic/audio
-    // のガベージコレクションの項より
-
-// 参照が残っていない
-// オーディオが停止している
-// サウンドスケジューリングが設定されていない
-// ノードが接続されていない
-// 処理すべきデータが残っていない
-    musicChange() {
-      this.source.stop();//オーディオの停止
-
-      this.musicFile = "/music2.mp3"
-      const newSource = this.audioContext.createBufferSource();
-
-      // 音楽ファイルを読み込む。
-      var request = new XMLHttpRequest();
-      request.open('GET', this.musicFile, true);
-      request.responseType = 'arraybuffer';
-      request.send();
-
-      let tis = this
-      request.onload = function () {
-        var res = request.response;
-        tis.audioContext.decodeAudioData(res, function (buf) {
-          newSource.buffer = buf;
-        });
-      };
-      newSource.connect(this.audioContext.destination);
-      newSource.connect(this.gainNode); // 音量系統と接続
-
-      // あたらしい AudioBufferSourceNode をパラメータに突っ込む
-      this.source = newSource
-
-      if ( ! this.isMusicStatusStop){
-        this.source.start();
-      }
-    },
-
     musicStart() {
       this.musicStatus = MUSIC_PLAY
       if (process.browser) { // Nuxt サーバーサイドで実行しない

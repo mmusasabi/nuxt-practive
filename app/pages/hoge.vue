@@ -7,13 +7,25 @@
       <h2 class="subtitle">
         nuxt practice
       </h2>
+
+      <p v-on:click="$store.commit('increment')">
+        {{ count }}
+      </p>
+
     </div>
   </section>
 </template>
 
 <script>
+import { mapMutations } from 'vuex'
+
 export default {
-  layout: 'simple'
+  layout: 'simple',
+  computed: {
+    count () {
+      return this.$store.state.counter
+    }
+  },
 }
 </script>
 
