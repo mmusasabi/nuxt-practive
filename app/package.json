@@ -15,7 +15,10 @@
   "dependencies": {
     "@nuxtjs/auth": "^4.8.4",
     "@nuxtjs/axios": "^5.7.1",
-    "nuxt": "^2.0.0"
+    "@nuxtjs/style-resources": "^1.0.0",
+    "nuxt": "^2.0.0",
+    "stylus": "^0.54.7",
+    "stylus-loader": "^3.0.2"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.1",

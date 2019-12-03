@@ -41,8 +41,18 @@ module.exports = {
   modules: [
     // '@nuxtjs/auth',
     '@nuxtjs/axios',
+
+    '@nuxtjs/style-resources',
   ],
-  axios: {
+
+  // style-resources を利用したスタイルファイルの読み込み
+  styleResources: {
+    stylus: [
+      './assets/css/*.styl'
+    ]
+  },
+
+   axios: {
     baseURL: "https://api.github.com"
   }
 }
