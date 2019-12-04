@@ -45,6 +45,10 @@ module.exports = {
     '@nuxtjs/style-resources',
   ],
 
+  plugins: [
+    '~/plugins/audio-context-node.js'
+  ],
+
   // style-resources を利用したスタイルファイルの読み込み
   styleResources: {
     stylus: [

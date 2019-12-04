@@ -7,6 +7,8 @@ export const state = () => ({
   
 export const mutations = {
   increment (state) {
+    console.log('incrementを実施');
+    
     state.counter++
   }
 }

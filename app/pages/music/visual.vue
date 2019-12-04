@@ -58,7 +58,7 @@ export default {
 // AudioBufferSourceNodeは基本使い捨で。使い終わったた（音楽を停止）すると再度再生できない（エラーになる
 // 一時停止が存在するので、連続で再生、停止をするなら、一時停止（suspend）＝＞再開（resume）という流れ
 
-  created() {    
+  created() {
     if (process.browser) { // Nuxt サーバーサイドで実行しない
       this.audioContext = new AudioContext()
       this.source = this.audioContext.createBufferSource(); // AudioBufferSourceNodeを作成

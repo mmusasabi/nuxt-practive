@@ -25,15 +25,41 @@
 </template>
 
 <script>
+// import { mapMutations } from 'vuex'
 import AudioControl from '~/components/music/AudioControl.vue'
-// import AppLogo from '~/components/AppLogo.vue'
-// import AppLogo from '~/components/AppLogo.vue'
 
 export default {
+  layout: 'musicVisualizer',
   components: {
     AudioControl
   },
-  layout: 'musicVisualizer'
+  
+  // https://ja.nuxtjs.org/api/pages-fetch
+  // ページがレンダーされる前に行う動作
+  fetch ({ store, params }) {
+    store.commit('increment')
+
+    // audioInit() はfetch内ではインスタンス化されていないため、methodsに定義しても呼べない。
+    if (process.browser) { // Nuxt サーバーサイドで実行しない
+      // 基本的にサーバー側で処理されるでこれだとinit処理としては良くない。
+      // store.commit('audio/audioInit', 'fetch')
+    }
+  },
+
+  created() {
+    if (process.browser){
+      this.$store.commit('audio/audioInit', {
+        text: 'created',
+        audioContext: new (window.AudioContext || window.webkitAudioContext)()
+      })
+    }
+  }
+
+  // methods: {
+  //   ...mapMutations({
+  //     audioInit: 'audio/init'
+  //   })
+  // }
 }
 </script>
 

@@ -17,9 +17,14 @@
         <button>
           前の曲
         </button>
-        <button>
-          再生or停止
+
+        <button v-if="musicPlayStatus" v-on:click="musicStop()">
+          停止
         </button>
+        <button v-else v-on:click="musicStart()">
+          再生
+        </button>
+
         <button>
           次の曲
         </button>
@@ -39,6 +44,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 
 export default {
   data() {
@@ -47,9 +53,23 @@ export default {
   },
 
   computed: {
+    ...mapGetters({
+      musicPlayStatus: 'audio/musicPlayStatus',
+    })
   },
 
   methods: {
+    musicStart() {
+      this.$store.dispatch('audio/musicStart').then((result) => {
+        console.log(result);
+      })
+    },
+
+    musicStop() {
+      this.$store.dispatch('audio/musicStop').then((result) => {
+        console.log(result);
+      })
+    }
   }
 }
 </script>
