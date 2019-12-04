@@ -50,7 +50,7 @@ export default {
       source: null,
       gainNode: null,
       musicStatus: MUSIC_STOP,
-      musicVolume: -0.5, // 初期音量 50%...?
+      musicVolume: 0, // 初期音量 100%...?
       musicFile: "/music.mp3" 
     }
   },
@@ -83,6 +83,9 @@ export default {
       this.source.connect(this.gainNode);
       this.gainNode.connect(this.audioContext.destination);
       // this.gainNode.gain.value が音量のやつ。　初期値1。-1で音が消える。-2と0で音量一緒。
+      // gainNodeのgainは音量の増幅を変化させる値。
+      // WebAudioApiで作った音は０で音が消えるっぽいので、増幅なしでも音がなる音楽ファイルでは、音量が－１
+      // つまり、増幅されている音を打ち消すことで音楽が消える...という雰囲気？
       this.gainNode.gain.value = this.musicVolume;
     }
     console.log(this.audioContext);
