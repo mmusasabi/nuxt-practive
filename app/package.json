@@ -16,6 +16,8 @@
     "@nuxtjs/auth": "^4.8.4",
     "@nuxtjs/axios": "^5.7.1",
     "@nuxtjs/style-resources": "^1.0.0",
+    "encoding-japanese": "^1.0.30",
+    "jDataView": "^2.3.0",
     "nuxt": "^2.0.0",
     "stylus": "^0.54.7",
     "stylus-loader": "^3.0.2"

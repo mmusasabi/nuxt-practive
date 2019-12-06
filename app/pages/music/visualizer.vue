@@ -44,6 +44,9 @@ export default {
       // 基本的にサーバー側で処理されるでこれだとinit処理としては良くない。
       // store.commit('audio/audioInit', 'fetch')
     }
+
+    // TODO: Cookieとかにボリュームの設定とか保存しておいて、読み込んだ瞬間取り出しとく？
+
   },
 
   created() {

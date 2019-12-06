@@ -3,6 +3,10 @@
     <div class="col music-info">
       <p class="test">
         曲名
+
+        <span v-if="loading">
+          なうろーど
+        </span>
       </p>
       <p>
         アーティスト名
@@ -38,7 +42,8 @@
     </div>
 
     <div class="col play-volume">
-
+      <span>Volume: </span>
+      <input type="range" min="0" max="100" v-model="audioVolume">
     </div>
   </section>
 </template>
@@ -49,6 +54,14 @@ import { mapGetters } from 'vuex'
 export default {
   data() {
     return {
+      loading: false,
+      audioVolume: 50
+    }
+  },
+
+  watch: {
+    audioVolume(volume) {
+      this.$store.dispatch('audio/changeAudioVolume', volume)
     }
   },
 
@@ -60,7 +73,9 @@ export default {
 
   methods: {
     musicStart() {
+      this.loading = true
       this.$store.dispatch('audio/musicStart').then((result) => {
+        this.loading = false
         console.log(result);
       })
     },
