@@ -1,42 +1,77 @@
 // Vuex
+const AUDIO_STOP = 'stop' // 停止
+const AUDIO_PLAY = 'play' // 再生
+const AUDIO_SUSPEND = 'suspend' // 一時停止
+
 // ステート
 export const state = () => ({
   audioContext: null,
   audioSource: null,
   gainNode: null,
 
-  audioPlayStatus: false, // 仮
+  audioStartPlayTime: 0,
+  audioDuration: 0,
+  
+  audioPlayStatus: AUDIO_STOP, // 仮
   text: '',
   list: []
 })
 
 // ゲッター
 export const getters = {
-  // TODO: audioSourceの状態を見て再生中かどうかをリターンするようにしたい。
+  // objectの中身見てるのでcomputedとかで反応しないので注意
+  audioContext(state) {
+    return state.audioContext
+  },
+
+  audioSource(state){
+    return state.audioSource
+  },
+
   musicPlayStatus(state) {
-    return state.audioPlayStatus
-  }
+    return state.audioPlayStatus === AUDIO_PLAY
+  },
+
+  audioDuration(state) {
+    return Math.ceil(state.audioDuration)
+  },
+
+  // NOTE: メソッドスタイルアクセスで呼ばないと毎回計算されないため
+  // this.$store.getters['audio/musicPlayedTime']()
+  musicPlayedTime: (state) => () => {
+    console.log('Call musicPlayedTime');
+    return state.audioContext.currentTime - state.audioStartPlayTime
+  },
 }
 
 // ミューテーション
 export const mutations = {
   // 兎にも角にも一度state.audioContextにaudioContextを突っ込む。話はそれからだ。
   audioInit (state, {text, audioContext}) {
-    state.text = text
-    state.audioContext = audioContext
+    if (state.audioContext === null) {
+      state.text = text
+      state.audioContext = audioContext  
+    }
   },
 
   resetAudioNode (state, audioSource) {
     if(state.audioSource) { // 再生中なら止める
       state.audioSource.stop()
     }
-    state.audioSource = audioSource
-    state.gainNode    = state.audioContext.createGain();
+    state.audioSource   = audioSource
+    state.audioDuration = audioSource.buffer.duration
+    state.gainNode      = state.audioContext.createGain();
+  },
+
+  setStartTime(state) {
+    if (state.audioContext !== null) {
+      state.audioStartPlayTime = state.audioContext.currentTime
+    }
   },
 
   changeAudioStatus(state, status){
-    state.audioPlayStatus=status
-  }
+    state.audioPlayStatus = status
+  },
 }
 
 // アクション
@@ -44,23 +79,24 @@ export const actions = {
   /**
    * 音楽を再生する
    *
-   * @return string
+   * @return Promise
    */
-  async musicStart({commit, state}) { // HACK?: 非同期にしている理由も特にないが、そのまま。
-    var musicFileName = '/music2.mp3'
+  musicStart({commit, state}, audioVolume = 50, musicFileName = '/music2.mp3') { // HACK?: 非同期にしている理由も特にないが、そのまま。
+    return this.$loadDecodeAudioData(state.audioContext, musicFileName).then((audioSource) =>{
+      commit('resetAudioNode', audioSource)
 
-    commit('resetAudioNode', this.$loadDecodeAudioData(state.audioContext, musicFileName))
+      // TODO: このへんの処理もresetAudioNodeに移設したい
+      state.audioSource.connect(state.audioContext.destination);
+      state.audioSource.connect(state.gainNode);
+  
+      state.gainNode.connect(state.audioContext.destination);
+      state.gainNode.gain.value = calcGainVolume(audioVolume);
+      
+      state.audioSource.start();
 
-    state.audioSource.connect(state.audioContext.destination);
-    state.audioSource.connect(state.gainNode);
-
-    state.gainNode.connect(state.audioContext.destination);
-    state.gainNode.gain.value = -0.5;
-    
-    state.audioSource.start();
-
-    commit('changeAudioStatus', true)
-    return 'start'
+      commit('setStartTime')
+      commit('changeAudioStatus', AUDIO_PLAY)
+    })
   },
 
   /**
@@ -68,23 +104,44 @@ export const actions = {
    *
    * @return string
    */
-  async musicStop({commit, state}) {
+  musicStop({commit, state}) {
     // TODO: 再開できる形で音楽止める処理書く
     state.audioSource.stop();
 
-    commit('changeAudioStatus', false)
+    commit('changeAudioStatus', AUDIO_SUSPEND)
     return 'stop'
   },
 
   /**
-   * ユーザIDをキーにキャッシュから本の配列を取得する。
+   * 音量を変更する
    *
+   * @param Object context
    * @param int setVolume
    */
-  changeAudioVolume({commit, state}, setVolume) {
-    var gainValue = parseInt(setVolume)
-    if(gainValue > 100){gainValue = 100}
-    if(gainValue < 0  ){gainValue = 0  }
-    state.gainNode.gain.value = gainValue / 100 - 1
+  changeAudioVolume({getters, commit, state}, setVolume) {
+    if(state.gainNode === null) {
+      console.log('dont start music')
+      return
+    }
+    state.gainNode.gain.value = calcGainVolume(setVolume)
   }
+}
+
+
+
+// 
+// private function
+// 
+
+/**
+ * gainNodeのgain値に設定可能な音量の値を返す。
+ *
+ * @param int audioVolume
+ * @return double
+ */
+function calcGainVolume(audioVolume) {
+  var gainValue = parseInt(audioVolume)
+  if(gainValue > 100){gainValue = 100}
+  if(gainValue < 0  ){gainValue = 0  }
+  return gainValue / 100 - 1
 }

@@ -6,29 +6,32 @@
 import jDataView from 'jDataView'
 import Encoding from 'encoding-japanese'
 
+
+import axios from 'axios'
+
 export default ({ app }, inject) => {
-
-  // musicFileName ex) /music1.mp3
-  inject('loadDecodeAudioData', (audioContext, musicFileName) => {
-    console.log('Call loadDecodeAudioData methods')
-
+  /**
+   * 音楽データを取得し、audioSourceをreturnするpromiseを返却する
+   *
+   * @param Object audioContext
+   * @param string musicFileName
+   * @return Promise
+   */
+  inject('loadDecodeAudioData', (audioContext, musicFileName = '/music1.mp3') => {
     // 音楽ファイルを読み込む。
     const request = new XMLHttpRequest();
     const audioSource = audioContext.createBufferSource(); // AudioBufferSourceNodeを作成
 
-    request.open('GET', musicFileName, true);
-    request.responseType = 'arraybuffer';
-    request.send();
-
-    request.onload = function () {
-      var res = request.response;
-      parseAudioInfo(res)
-      audioContext.decodeAudioData(res, function (buf) {
-        audioSource.buffer = buf;
-      });
-    };
-  
-    return audioSource
+    return axios.get(musicFileName, { responseType : 'arraybuffer' })
+                .then(response => {
+                  const arrayBuffer = response.data
+                  parseAudioInfo(arrayBuffer)
+                  return audioContext.decodeAudioData(arrayBuffer, function (buf) {
+                    audioSource.buffer = buf;
+                  });
+                }).then(() => {
+                  return audioSource
+                })
   })
 }
 
@@ -62,4 +65,7 @@ function parseAudioInfo(arrayBuffer) {
   // これ見れば行けそうな気がするが...どうだろう...
   // https://github.com/43081j/id3
   // これも使えそう。
+
+  // https://developer.spotify.com/
+  // TODO: spotifyのAPIを使ってアルバムアートワークとか取得したいね。
 }
