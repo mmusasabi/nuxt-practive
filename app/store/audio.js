@@ -10,6 +10,7 @@ export const state = () => ({
   gainNode: null,
 
   audioStartPlayTime: 0,
+  audioOffset: 0,
   audioDuration: 0,
   
   audioPlayStatus: AUDIO_STOP, // 仮
@@ -40,7 +41,9 @@ export const getters = {
   // this.$store.getters['audio/musicPlayedTime']()
   musicPlayedTime: (state) => () => {
     // console.log('Call musicPlayedTime');
-    return state.audioContext.currentTime - state.audioStartPlayTime
+    console.log(typeof state.audioOffset);
+    
+    return state.audioContext.currentTime - state.audioStartPlayTime + state.audioOffset
   },
 }
 
@@ -63,9 +66,10 @@ export const mutations = {
     state.gainNode      = state.audioContext.createGain();
   },
 
-  setStartTime(state) {
+  setStartTime(state, offset = 0) {
     if (state.audioContext !== null) {
-      state.audioStartPlayTime = state.audioContext.currentTime
+      state.audioOffset = offset
+      state.audioStartPlayTime = state.audioContext.currentTime      
     }
   },
 
@@ -79,10 +83,14 @@ export const actions = {
   /**
    * 音楽を再生する
    *
+   * @param int audioVolume
+   * @param string musicFileName
+   * @param int duration
    * @return Promise
    */
-  musicStart({commit, state}, audioVolume = 50, musicFileName = '/music2.mp3') { // HACK?: 非同期にしている理由も特にないが、そのまま。
-    if(state.audioContext.state === 'suspended') {
+  musicStart({commit, state}, {audioVolume = 50, musicFileName = '/music2.mp3', offset = 0}) {
+    // サスペンド中、durationの指定なし（時間指定再生ではない）場合、
+    if(state.audioContext.state === 'suspended' && offset === 0) {
       return state.audioContext.resume().then(() => {
         commit('changeAudioStatus', AUDIO_PLAY)
       })
@@ -97,10 +105,16 @@ export const actions = {
   
       state.gainNode.connect(state.audioContext.destination);
       state.gainNode.gain.value = calcGainVolume(audioVolume);
-      
-      state.audioSource.start();
 
-      commit('setStartTime')
+      // サスペンド中かもしれないので必ずresumuしておく
+      return state.audioContext.resume()
+    }).then(() => {
+      if (offset === 0){
+        return state.audioSource.start();
+      }
+      return state.audioSource.start(undefined, offset)
+    }).then(() => {
+      commit('setStartTime', offset)
       commit('changeAudioStatus', AUDIO_PLAY)
     })
   },

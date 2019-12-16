@@ -67,17 +67,16 @@ export default {
   mounted () {
     const ths = this
     this.intervalId = setInterval(function () {
-      // console.log(ths.$store.getters);
-      // console.log('audio/musicPlayedTime: ' + ths.$store.getters['audio/musicPlayedTime'](12));
-      // console.log('audio context time: ' + ths.audioContext.currentTime);
       if(ths.audioSource && ths.audioSource.buffer) {
-        ths.playTime = Math.floor(ths.$store.getters['audio/musicPlayedTime']())
+        const updateTime = Math.floor(ths.$store.getters['audio/musicPlayedTime']())
+        if(ths.playTime + 1 === updateTime){
+          ths.playTime = updateTime
+        }
       }
     }, 100)
   },
 
   beforeDestroy () {
-    console.log('clearInterval')
     clearInterval(this.intervalId)
   },
 
@@ -98,7 +97,7 @@ export default {
     // TODO: ２つの処理似てるよ
     playingTime(){
       let min = Math.floor(this.playTime / 60)
-      let sec = this.playTime % 60
+      let sec = ('00' + this.playTime % 60).slice(-2)
       return min + ':' + sec
     },
 
@@ -112,7 +111,9 @@ export default {
   methods: {
     musicStart() {
       this.loading = true
-      this.$store.dispatch('audio/musicStart', this.audioVolume).then((result) => {
+      this.$store.dispatch('audio/musicStart', {
+        audioVolume: this.audioVolume
+      }).then((result) => {
         this.loading = false
         console.log(result);
       })
@@ -126,19 +127,17 @@ export default {
 
     // HACK: 途中から再生のもっといい名前
     musicMiddleStart(e) {
-      console.log(e);
-      console.log('change');
-      // todo: 時間に合わせて再生位置を変更する。 
+      console.log(e.target.value);
+      this.playTime = parseInt(e.target.value, 10)
+      this.loading = true
+      this.$store.dispatch('audio/musicStart', {
+        audioVolume: this.audioVolume,
+        offset: this.playTime
+      }).then((result) => {
+        this.loading = false
+        console.log(result);
+      })
     }
-
-  // 一時停止
-  // suspendContext() {
-	// 	audioContext.suspend();
-	// }
-  // 再開
-	// resumeContext() {
-	// 	audioContext.resume();
-	// }
   }
 }
 </script>
