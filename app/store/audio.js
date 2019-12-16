@@ -39,7 +39,7 @@ export const getters = {
   // NOTE: メソッドスタイルアクセスで呼ばないと毎回計算されないため
   // this.$store.getters['audio/musicPlayedTime']()
   musicPlayedTime: (state) => () => {
-    console.log('Call musicPlayedTime');
+    // console.log('Call musicPlayedTime');
     return state.audioContext.currentTime - state.audioStartPlayTime
   },
 }
@@ -82,6 +82,12 @@ export const actions = {
    * @return Promise
    */
   musicStart({commit, state}, audioVolume = 50, musicFileName = '/music2.mp3') { // HACK?: 非同期にしている理由も特にないが、そのまま。
+    if(state.audioContext.state === 'suspended') {
+      return state.audioContext.resume().then(() => {
+        commit('changeAudioStatus', AUDIO_PLAY)
+      })
+    }
+
     return this.$loadDecodeAudioData(state.audioContext, musicFileName).then((audioSource) =>{
       commit('resetAudioNode', audioSource)
 
@@ -106,7 +112,14 @@ export const actions = {
    */
   musicStop({commit, state}) {
     // TODO: 再開できる形で音楽止める処理書く
-    state.audioSource.stop();
+    // state.audioSource.stop();
+
+    console.log(state.audioContext.state); //running
+
+    state.audioContext.suspend()
+
+    console.log(state.audioContext.state); //suspended
+    
 
     commit('changeAudioStatus', AUDIO_SUSPEND)
     return 'stop'

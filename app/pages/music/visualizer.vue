@@ -7,11 +7,11 @@
     <div class="contents">
       <section class="audio-playing">
         <section class="menu">
-          hoge
+          hoge menu
         </section>
 
         <section class="visualizer">
-          huga
+          huga visualizer
         </section>
       </section>
 
@@ -35,22 +35,22 @@ export default {
   },
   
   // https://ja.nuxtjs.org/api/pages-fetch
-  // ページがレンダーされる前に行う動作
+  // MEMO: ページがレンダーされる前に行う動作
+  // 主にサーバサイドで処理するものを記載しておく。
   fetch ({ store, params }) {
     store.commit('increment')
-
     // audioInit() はfetch内ではインスタンス化されていないため、methodsに定義しても呼べない。
+
     if (process.browser) { // Nuxt サーバーサイドで実行しない
-      // 基本的にサーバー側で処理されるでこれだとinit処理としては良くない。
+      // インスタンス化出来てないので死ぬ
       // store.commit('audio/audioInit', 'fetch')
     }
-
-    // TODO: Cookieとかにボリュームの設定とか保存しておいて、読み込んだ瞬間取り出しとく？
-
   },
 
   created() {
     if (process.browser){
+      // TODO: Cookieとかにボリュームの設定とか保存しておいて、読み込んだ瞬間取り出しとく？
+
       this.$store.commit('audio/audioInit', {
         text: 'created',
         audioContext: new (window.AudioContext || window.webkitAudioContext)()

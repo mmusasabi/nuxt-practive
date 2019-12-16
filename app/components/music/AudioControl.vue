@@ -68,13 +68,12 @@ export default {
     const ths = this
     this.intervalId = setInterval(function () {
       // console.log(ths.$store.getters);
-      console.log('audio/musicPlayedTime: ' + ths.$store.getters['audio/musicPlayedTime'](12));
-
-      console.log('audio context time: ' + ths.audioContext.currentTime);
+      // console.log('audio/musicPlayedTime: ' + ths.$store.getters['audio/musicPlayedTime'](12));
+      // console.log('audio context time: ' + ths.audioContext.currentTime);
       if(ths.audioSource && ths.audioSource.buffer) {
         ths.playTime = Math.floor(ths.$store.getters['audio/musicPlayedTime']())
       }
-    }, 800)
+    }, 100)
   },
 
   beforeDestroy () {
@@ -96,6 +95,7 @@ export default {
       audioDuration: 'audio/audioDuration',
     }),
 
+    // TODO: ２つの処理似てるよ
     playingTime(){
       let min = Math.floor(this.playTime / 60)
       let sec = this.playTime % 60
