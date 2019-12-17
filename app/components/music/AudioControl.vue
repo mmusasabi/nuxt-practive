@@ -1,19 +1,26 @@
 <template>
   <section class="row">
-    <div class="col music-info">
-      <p class="test">
-        曲名
-
+    <div class="col audio-info">
+      <p>
+        title:
+        {{ audioData.title }}
         <span v-if="loading">
-          なうろーど
+          Loading...
         </span>
       </p>
       <p>
-        アーティスト名
+        artist:
+        {{ audioData.artist }}
+      </p>
+      <p class="small">
+        album: {{ audioData.album }}
+      </p>
+      <p class="small">
+        year: {{ audioData.year }}
       </p>
     </div>
 
-    <div class="col music-control">
+    <div class="col audio-control-panel">
       <div class="control-button">
         <button>
           <!-- シャッフル -->
@@ -43,7 +50,7 @@
       </div>
     </div>
 
-    <div class="col play-volume">
+    <div class="col audio-volume">
       <span>Volume: </span>
       <input type="range" min="0" max="100" v-model="audioVolume">
     </div>
@@ -89,9 +96,10 @@ export default {
   computed: {
     ...mapGetters({
       musicPlayStatus: 'audio/musicPlayStatus',
-      audioContext: 'audio/audioContext',
-      audioSource: 'audio/audioSource',
-      audioDuration: 'audio/audioDuration',
+      audioContext:    'audio/audioContext',
+      audioSource:     'audio/audioSource',
+      audioDuration:   'audio/audioDuration',
+      audioData:       'audio/audioData',
     }),
 
     // TODO: ２つの処理似てるよ
@@ -143,5 +151,11 @@ export default {
 </script>
 
 <style scoped lang="stylus">
+.audio-info, .audio-control-panel, .audio-volume
+  padding: 8px
+
+
+p.small
+  font-size: 12px
 </style>
 

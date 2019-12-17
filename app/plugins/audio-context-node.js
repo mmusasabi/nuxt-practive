@@ -6,37 +6,70 @@
 import jDataView from 'jDataView'
 import Encoding from 'encoding-japanese'
 
-
 import axios from 'axios'
 
 export default ({ app }, inject) => {
   /**
-   * 音楽データを取得し、audioSourceをreturnするpromiseを返却する
+   * 音楽データを取得し、次にarrayBufferを返り値とするpromiseを返す
    *
-   * @param Object audioContext
-   * @param string musicFileName
+   * @param String musicFileName
    * @return Promise
    */
-  inject('loadDecodeAudioData', (audioContext, musicFileName = '/music1.mp3') => {
-    // 音楽ファイルを読み込む。
-    const request = new XMLHttpRequest();
-    const audioSource = audioContext.createBufferSource(); // AudioBufferSourceNodeを作成
-
+  inject('loadAudioData', (musicFileName) => {
+    if(typeof musicFileName !== String.name.toLowerCase()){
+      throw new Error("曲名をStringで渡してください");
+    }
     return axios.get(musicFileName, { responseType : 'arraybuffer' })
                 .then(response => {
-                  const arrayBuffer = response.data
-                  parseAudioInfo(arrayBuffer)
-                  return audioContext.decodeAudioData(arrayBuffer, function (buf) {
-                    audioSource.buffer = buf;
-                  });
-                }).then(() => {
-                  return audioSource
+                  return response.data // arrayBuffer
                 })
+  })
+
+  /**
+   * arrayBufferを元に、audioSourceを返り値とするpromiseを返す
+   *
+   * @param Object audioContext
+   * @param Object arrayBuffer
+   * @return Promise
+   */
+  inject('initAudioSource', (audioContext, arrayBuffer) => {
+    if(audioContext.constructor !== AudioContext){
+      throw new Error("第一引数にAudioContextを渡してください");
+    }
+    if(arrayBuffer.constructor !== ArrayBuffer){
+      throw new Error("第二引数にArrayBufferを渡してください");
+    }
+
+    const audioSource = audioContext.createBufferSource(); // AudioBufferSourceNodeを作成
+    
+    return audioContext.decodeAudioData(arrayBuffer, function (buf) {
+      audioSource.buffer = buf;
+    }).then(() => {
+      return audioSource
+    })
+  })
+
+  /**
+   * arrayBufferを元に、audioの情報を読み出して返す
+   *
+   * @param ArrayBuffer arrayBuffer
+   * @return Promise
+   */
+  inject('loadAudioInfo', (arrayBuffer) => {
+    if(arrayBuffer.constructor !== ArrayBuffer){
+      throw new Error("引数にArrayBufferを渡してください");
+    }
+    return parseAudioInfo(arrayBuffer)
   })
 }
 
+//
+// private
+//
+
 function parseAudioInfo(arrayBuffer) {
-  var jdv = new jDataView(arrayBuffer);
+  const jdv = new jDataView(arrayBuffer);
+  var title, artist, album, year
 
   // ID3v1.1
   if (jdv.getString(3, jdv.byteLength - 128) == 'TAG') {
@@ -46,15 +79,10 @@ function parseAudioInfo(arrayBuffer) {
       type: 'string'
     }
 
-    var title  = jdv.getBytes(30, jdv.tell());
-    var artist = jdv.getBytes(30, jdv.tell());
-    var album  = jdv.getBytes(30, jdv.tell());
-    var year   = jdv.getBytes(4, jdv.tell());
-
-    console.log(Encoding.convert(title, convertSetting));
-    console.log(Encoding.convert(artist, convertSetting));
-    console.log(Encoding.convert(album, convertSetting));
-    console.log(Encoding.convert(year, convertSetting));
+    title  = Encoding.convert(jdv.getBytes(30, jdv.tell()), convertSetting)
+    artist = Encoding.convert(jdv.getBytes(30, jdv.tell()), convertSetting)
+    album  = Encoding.convert(jdv.getBytes(30, jdv.tell()), convertSetting)
+    year   = Encoding.convert(jdv.getBytes(4, jdv.tell()), convertSetting)
   } else {
     // no ID3v1 data found.
     console.log('no ID3v1 data found.');
@@ -68,4 +96,11 @@ function parseAudioInfo(arrayBuffer) {
 
   // https://developer.spotify.com/
   // TODO: spotifyのAPIを使ってアルバムアートワークとか取得したいね。
+
+  return {
+    title: title,
+    artist: artist,
+    album: album,
+    year: year,
+  }
 }
