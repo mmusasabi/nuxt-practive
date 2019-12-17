@@ -28,33 +28,17 @@ export const state = () => ({
     year:   AUDIO_INFO_DEFAULT_YEAR, // 発売年
   },
 
-  audioPlayStatus: AUDIO_STOP, // 仮
-  text: '',
+  audioPlayStatus: AUDIO_STOP,
   list: []
 })
 
 // ゲッター
 export const getters = {
-  // objectの中身見てるのでcomputedとかで反応しないので注意
-  audioContext(state) {
-    return state.audioContext
-  },
-
-  audioSource(state){
-    return state.audioSource
-  },
-
-  musicPlayStatus(state) {
-    return state.audioPlayStatus === AUDIO_PLAY
-  },
-
-  audioDuration(state) {
-    return Math.ceil(state.audioDuration)
-  },
-
-  audioData(state) {
-    return state.audioData
-  },
+  audioContext(state)    { return state.audioContext },
+  audioSource(state)     { return state.audioSource },
+  musicPlayStatus(state) { return state.audioPlayStatus === AUDIO_PLAY },
+  audioDuration(state)   { return Math.ceil(state.audioDuration) },
+  audioData(state)       { return state.audioData },
 
   // NOTE: メソッドスタイルアクセスで呼ばないと毎回計算されないため
   // this.$store.getters['audio/musicPlayedTime']()
@@ -66,9 +50,8 @@ export const getters = {
 // ミューテーション
 export const mutations = {
   // 兎にも角にも一度state.audioContextにaudioContextを突っ込む。話はそれからだ。
-  audioInit (state, {text, audioContext}) {
+  audioInit (state, audioContext) {
     if (state.audioContext === null && audioContext.constructor === AudioContext) {
-      state.text = text
       state.audioContext = audioContext  
     }
   },

@@ -10,9 +10,7 @@
           hoge menu
         </section>
 
-        <section class="visualizer">
-          huga visualizer
-        </section>
+        <audio-canvas class="visualizer audio-canvas" />
       </section>
 
       <audio-control class="audio-control" />
@@ -26,11 +24,13 @@
 
 <script>
 // import { mapMutations } from 'vuex'
+import AudioCanvas from '~/components/music/AudioCanvas.vue'
 import AudioControl from '~/components/music/AudioControl.vue'
 
 export default {
   layout: 'musicVisualizer',
   components: {
+    AudioCanvas,
     AudioControl
   },
   
@@ -50,11 +50,10 @@ export default {
   created() {
     if (process.browser){
       // TODO: Cookieとかにボリュームの設定とか保存しておいて、読み込んだ瞬間取り出しとく？
-
-      this.$store.commit('audio/audioInit', {
-        text: 'created',
-        audioContext: new (window.AudioContext || window.webkitAudioContext)()
-      })
+      this.$store.commit(
+        'audio/audioInit',
+        new (window.AudioContext || window.webkitAudioContext)()
+      )
     }
   }
 
@@ -93,6 +92,7 @@ $audio-control-height = 100px
       .visualizer
         padding-left: $menu
         width: 100%
+        height: 100%
 
     .audio-control
       width: 100%
