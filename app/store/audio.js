@@ -20,6 +20,9 @@ export const state = () => ({
   audioStartPlayTime: 0,
   audioOffset: 0,
   audioDuration: 0,
+
+  audioAnalyserNode: null,
+  audioFrequency: null, // 周波数 frequencyBinCount
   
   audioData: {
     title:  AUDIO_INFO_DEFAULT_TITLE, // 曲名
@@ -34,11 +37,13 @@ export const state = () => ({
 
 // ゲッター
 export const getters = {
-  audioContext(state)    { return state.audioContext },
-  audioSource(state)     { return state.audioSource },
-  musicPlayStatus(state) { return state.audioPlayStatus === AUDIO_PLAY },
-  audioDuration(state)   { return Math.ceil(state.audioDuration) },
-  audioData(state)       { return state.audioData },
+  audioContext(state)     { return state.audioContext },
+  audioSource(state)      { return state.audioSource },
+  musicPlayStatus(state)  { return state.audioPlayStatus === AUDIO_PLAY },
+  audioDuration(state)    { return Math.ceil(state.audioDuration) },
+  audioData(state)        { return state.audioData },
+  audioAnalyserNode(state){ return state.audioAnalyserNode },
+  audioFrequency(state)   { return state.audioFrequency },
 
   // NOTE: メソッドスタイルアクセスで呼ばないと毎回計算されないため
   // this.$store.getters['audio/musicPlayedTime']()
@@ -63,6 +68,7 @@ export const mutations = {
     state.audioSource   = audioSource
     state.audioDuration = audioSource.buffer.duration
     state.gainNode      = state.audioContext.createGain();
+    state.audioAnalyserNode = state.audioContext.createAnalyser();    
   },
 
   setStartTime(state, offset = 0) {
@@ -82,6 +88,10 @@ export const mutations = {
   changeAudioStatus(state, status){
     state.audioPlayStatus = status
   },
+
+  setAudioFrequency(state, uint8Array){
+    state.audioFrequency = uint8Array
+  }
 }
 
 // アクション
@@ -110,12 +120,18 @@ export const actions = {
 
     }).then((audioSource) =>{
       commit('resetAudioNode', audioSource)
+      commit('setAudioFrequency', new Uint8Array(state.audioAnalyserNode.frequencyBinCount))
 
-      // TODO: このへんの処理もresetAudioNodeに移設したい
-      state.audioSource.connect(state.audioContext.destination);
-      state.audioSource.connect(state.gainNode);
-  
+      // BufferNode to audioAnalyserNode
+      state.audioSource.connect(state.audioAnalyserNode)
+
+      // audioAnalyserNode to gainNode
+      state.audioAnalyserNode.connect(state.gainNode);
+
+      // gainNode to destination(最終出力)
       state.gainNode.connect(state.audioContext.destination);
+      
+      // 音量設定
       state.gainNode.gain.value = calcGainVolume(audioVolume);
 
       // サスペンド中かもしれないので必ずresumuしておく
@@ -159,8 +175,6 @@ export const actions = {
   }
 }
 
-
-
 // 
 // private function
 // 
@@ -175,5 +189,5 @@ function calcGainVolume(audioVolume) {
   var gainValue = parseInt(audioVolume)
   if(gainValue > 100){gainValue = 100}
   if(gainValue < 0  ){gainValue = 0  }
-  return gainValue / 100 - 1
+  return gainValue / 100
 }
