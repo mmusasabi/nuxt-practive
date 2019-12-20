@@ -23,23 +23,12 @@ export default {
       this.canvasContext = canvas.getContext('2d');
       canvas.width  = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
-
       canvasMap(canvas, this.canvasContext)
-      // canvasDrawTest(canvas, this.canvasContext)
+      canvasDrawTest(canvas, this.canvasContext)
     }
 
-    // なんか繰り返し描画するやつ
-    // HACK: requestAnimationFrameでどうにかしてみたい。
-    const ths = this
-    this.intervalId = setInterval(function () {
-      // 描画をリセット
-      ths.canvasContext.fillStyle = 'rgba(0, 0, 0, 1)';
-      ths.canvasContext.fillRect(0, 0, canvas.width, canvas.height);
-      // 補助線
-      canvasMap(canvas, ths.canvasContext)
-
-      ths.draw(canvas, ths.canvasContext)
-    }, 100)
+    // アニメーションとして描画
+    requestAnimationFrame(this.draw)
   },
 
   beforeDestroy () {
@@ -58,10 +47,21 @@ export default {
 
   methods: {
     // 参考： https://qiita.com/soarflat/items/4aa001dac115a4af6dbe#getbytefrequencydata%E3%81%A7%E5%8F%96%E5%BE%97%E3%81%97%E3%81%9F%E6%B3%A2%E5%BD%A2%E3%83%87%E3%83%BC%E3%82%BF%E3%82%92%E6%8F%8F%E7%94%BB%E3%81%99%E3%82%8B
-    draw(canvas, canvasContext){
-      if (this.audioAnalyserNode === null || this.audioFrequency === null){
-        return
+    draw(lisner){
+      var canvas = this.$refs.sample1
+      if (!canvas.getContext) {
+        return requestAnimationFrame(this.draw)
       }
+      if (this.audioAnalyserNode === null || this.audioFrequency === null){
+        return requestAnimationFrame(this.draw)
+      }
+
+      // 描画をリセット
+      this.canvasContext.fillStyle = 'lemonchiffon';
+      this.canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 補助線
+      canvasMap(canvas, this.canvasContext)
 
       const cw  = canvas.offsetWidth;
       const ch = canvas.offsetHeight;
@@ -85,9 +85,11 @@ export default {
         var percent = value / 255; // 255が最大値なので波形データの%が算出できる。
         var height = ch * percent; // %に基づく描画する高さを算出
 
-        canvasContext.fillStyle = '#0f0';
-        canvasContext.fillRect(i * barWidth, ch, barWidth, -height);  // -をつけないと下に描画されてしまう。
+        this.canvasContext.fillStyle = '#0f0';
+        this.canvasContext.fillRect(i * barWidth, ch, barWidth, -height);  // -をつけないと下に描画されてしまう。
       }
+
+      requestAnimationFrame(this.draw)
     }
   }
 }
