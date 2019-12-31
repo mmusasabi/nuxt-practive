@@ -40,6 +40,7 @@ export default {
 
   computed: {
     ...mapGetters({
+      musicPlayStatus: 'audio/musicPlayStatus',
       audioAnalyserNode: 'audio/audioAnalyserNode',
       audioFrequency:    'audio/audioFrequency',
     }),
@@ -67,19 +68,29 @@ export default {
       const ch = canvas.offsetHeight;
 
       // 0~1まで設定でき、0に近いほど描画の更新がスムーズになり, 1に近いほど描画の更新が鈍くなる。
-      this.audioAnalyserNode.smoothingTimeConstant = 0.5;
+      // 描画のスピード？１だと止まる。
+      this.audioAnalyserNode.smoothingTimeConstant = 0.8;
 
       // FFTサイズを指定する。デフォルトは2048。
-      this.audioAnalyserNode.fftSize = 2048;
+      // this.audioAnalyserNode.fftSize = 2048;
+      this.audioAnalyserNode.fftSize = 256;
 
       // 周波数領域の波形データを引数の配列に格納するメソッド。
       // analyserNode.fftSize / 2の要素がthis.freqsに格納される。今回の配列の要素数は1024。
       this.audioAnalyserNode.getByteFrequencyData(this.audioFrequency);
 
+      // this.audioAnalyserNode.getByteTimeDomainData(this.audioFrequency);
+
+      if(this.musicPlayStatus){
+        // console.log(this.audioFrequency);
+        console.log(this.audioAnalyserNode.frequencyBinCount);
+
+      }
+
       // 全ての波形データを描画するために、一つの波形データのwidthを算出する。
+      // frequencyBinCount == fftSize / 2
       var barWidth = cw / this.audioAnalyserNode.frequencyBinCount;
 
-      // analyserNode.frequencyBinCountはanalyserNode.fftSize / 2の数値。よって今回は1024。
       for (var i = 0; i < this.audioAnalyserNode.frequencyBinCount; ++i) {
         var value = this.audioFrequency[i]; // 配列には波形データ 0 ~ 255までの数値が格納されている。
         var percent = value / 255; // 255が最大値なので波形データの%が算出できる。
@@ -140,4 +151,3 @@ canvas#sample1
   width: 100%
   height: 100%
 </style>
-

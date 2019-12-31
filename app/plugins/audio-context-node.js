@@ -41,7 +41,7 @@ export default ({ app }, inject) => {
     }
 
     const audioSource = audioContext.createBufferSource(); // AudioBufferSourceNodeを作成
-    
+
     return audioContext.decodeAudioData(arrayBuffer, function (buf) {
       audioSource.buffer = buf;
     }).then(() => {

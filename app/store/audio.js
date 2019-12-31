@@ -23,7 +23,7 @@ export const state = () => ({
 
   audioAnalyserNode: null,
   audioFrequency: null, // 周波数 frequencyBinCount
-  
+
   audioData: {
     title:  AUDIO_INFO_DEFAULT_TITLE, // 曲名
     artist: AUDIO_INFO_DEFAULT_ARTIST, // アーティスト名
@@ -57,7 +57,7 @@ export const mutations = {
   // 兎にも角にも一度state.audioContextにaudioContextを突っ込む。話はそれからだ。
   audioInit (state, audioContext) {
     if (state.audioContext === null && audioContext.constructor === AudioContext) {
-      state.audioContext = audioContext  
+      state.audioContext = audioContext
     }
   },
 
@@ -68,13 +68,13 @@ export const mutations = {
     state.audioSource   = audioSource
     state.audioDuration = audioSource.buffer.duration
     state.gainNode      = state.audioContext.createGain();
-    state.audioAnalyserNode = state.audioContext.createAnalyser();    
+    state.audioAnalyserNode = state.audioContext.createAnalyser();
   },
 
   setStartTime(state, offset = 0) {
     if (state.audioContext !== null) {
       state.audioOffset = offset
-      state.audioStartPlayTime = state.audioContext.currentTime      
+      state.audioStartPlayTime = state.audioContext.currentTime
     }
   },
 
@@ -130,7 +130,7 @@ export const actions = {
 
       // gainNode to destination(最終出力)
       state.gainNode.connect(state.audioContext.destination);
-      
+
       // 音量設定
       state.gainNode.gain.value = calcGainVolume(audioVolume);
 
@@ -175,9 +175,9 @@ export const actions = {
   }
 }
 
-// 
+//
 // private function
-// 
+//
 
 /**
  * gainNodeのgain値に設定可能な音量の値を返す。

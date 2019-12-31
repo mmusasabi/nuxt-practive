@@ -124,7 +124,10 @@ export default {
       }).then((result) => {
         this.loading = false
         console.log(result);
-      })
+      }).catch(( error ) => {
+        // いずれかのreadFileでエラーがあった場合の処理
+        console.log( error );
+      });
     },
 
     musicStop() {
@@ -158,4 +161,3 @@ export default {
 p.small
   font-size: 12px
 </style>
-
